@@ -72,9 +72,6 @@ export default {
         playerHomeEntranceFieldUsedByEnemy() {
             if (this.playerHomeEntranceField.figure !== null) {
 
-                console.log(this.playerHomeEntranceField.figure)
-                console.log(this.activePlayer.figures)
-
                 const fieldFigure = this.activePlayer.figures.filter((figure) => {
                     return figure.id === this.playerHomeEntranceField.figure
                 })[0]
@@ -83,10 +80,25 @@ export default {
             }
 
             return false
+        },
+
+        useHomeFigure() {
+            return this.diceQuantity === 6 &&
+                this.firstFigureAtHome !== null &&
+                (
+                    this.playerHomeEntranceField.figure === null ||
+                    this.playerHomeEntranceFieldUsedByEnemy === true
+                );
         }
     },
 
     methods: {
+        playerFiguresOnField() {
+            return this.activePlayer.figures.filter((figure) => {
+                return figure.isHome === false
+            }).length
+        },
+
         preparePlayers() {
             this.players.forEach((player) => {
                 for (let i = 0; i < this.figureQuantity; i++) {
@@ -120,32 +132,42 @@ export default {
             }
         },
 
+        nextPlayer() {
+            console.log('Zug zuende')
+            
+            if (this.activePlayerIndex === (this.playersQuantity - 1)) {
+                this.activePlayerIndex = 0;
+
+                return
+            }
+
+            this.activePlayerIndex++
+        },
+
+        replaceFigure() {
+            console.log('Figur automatisch replacen')
+
+            this.nextPlayer()
+        },
+
         diceRoll() {
-            // let asd = true
-
-            // for (let i = 0; i < 10; i++) {
-            //     setTimeout(() => {
-            //         this.diceQuantity = Math.floor((Math.random() * 6) + 1)
-            //         console.log(this.diceQuantity)
-            //     }, 750)
-            // }
-
             this.diceQuantity = Math.floor((Math.random() * 6) + 1)
 
-            /**
-             * 6 gewürfelt
-             * min. 1 Figur im Start Home
-             * Eintrittsfeld frei
-             */
-            if (this.diceQuantity === 6 &&
-                this.firstFigureAtHome !== null &&
-                (
-                    this.playerHomeEntranceField.figure === null ||
-                    this.playerHomeEntranceFieldUsedByEnemy === true
-                )
-            ) {
-                console.log('6')
+            if (this.useHomeFigure) {
+                this.placeFigureOnGameField(this.firstFigureAtHome, this.playerHomeEntranceField)
+            } else if (this.playerFiguresOnField() > 1) {
+                console.log('Figur selber replacen')
+            } else if (this.playerFiguresOnField() > 0) {
+                this.replaceFigure()
+            } else {
+                this.nextPlayer()
             }
+        },
+
+        placeFigureOnGameField(figure, field) {
+            figure.isHome = false
+            figure.field = field.id
+            field.figure = figure.id
         },
 
         fieldStyle(index) {

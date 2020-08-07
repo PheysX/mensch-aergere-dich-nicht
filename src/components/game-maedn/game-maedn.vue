@@ -30,7 +30,11 @@
              v-for="(field, index) in fields"
              :style="fieldStyle(index)"
              :player-home="field.playerId"
-             :key="field.id"></div>
+             :key="field.id">
+          <span class="figure"
+                v-if="field.figure"
+                :key="field.figure"></span>
+        </div>
       </div>
     </div>
     <div :style="'width: 50px; height: 50px; background-color:' + getPlayers[activePlayerIndex].color">
